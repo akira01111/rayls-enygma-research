@@ -6,7 +6,11 @@ This file is not a smart-contract audit. It is not a cryptography audit. Reading
 
 Each item answers four questions: what was checked, where the code or data came from, what it proves, and what it cannot prove.
 
+Classification: each section below carries its own label, and no section is VERIFIED FACT by default. VERIFIED FACT means checked directly against the live RPC, the testnet explorer, the demo bundle, or verified source code. OFFICIAL CLAIM means a statement by Rayls in its documentation or blog, quoted or paraphrased, not independently verified. DESIGN DESCRIPTION means a description from the public reference repository, which the repository itself marks as design, not implemented. UNKNOWN means the check was attempted and the answer is not established. INFERENCE means a conclusion drawn from the evidence, marked as such where it appears. METHOD means reproducibility instructions, not a finding.
+
 ## 1. The live chain
+
+**Classification: VERIFIED FACT.** Chain ID and RPC behaviour checked directly against the live RPC and the demo bundle.
 
 ### What was checked
 
@@ -29,6 +33,8 @@ The Rayls Public Chain testnet RPC and its chain ID.
 - `eth_getTransactionReceipt` returned null for a deployment transaction that the explorer lists as mined. The receipt could not be confirmed through this RPC endpoint. The transaction itself was returned by `eth_getTransactionByHash`. See item 3.
 
 ## 2. The demo client bundle
+
+**Classification: VERIFIED FACT.** Bundle fetched and hashed directly; config values read from the bundle itself. Limited to the bundle as of 15 November 2026 (see 'What it cannot prove').
 
 ### What was checked
 
@@ -54,9 +60,13 @@ The JavaScript bundle served by the demo site, to find the chain config, the RPC
 
 ## 3. The deployed contracts
 
+**Classification: MIXED — VERIFIED FACT + UNKNOWN + INFERENCE.** VERIFIED FACT: addresses and config from the bundle, `eth_getCode` results, explorer `txlist` records, and the SharedVault (yx) deployment block 21568375 verified from the transaction record. UNKNOWN: which deployment the 13 November session used; the `@kittyrim` registration was not found in either registry; most deployment hashes were not individually verified on-chain. INFERENCE: the two possible reasons given for the missing registration are unestablished hypotheses, not findings.
+
 ### What was checked
 
 The contract addresses, deployment transaction hashes, block numbers, and auditor address in the bundle's Rayls testnet deployment configs, and their on-chain state through the public RPC and the testnet explorer.
+
+The contract addresses and configuration in this section come from the deployment records listed in the bundle. Only the addresses with `eth_getCode` results or explorer cross-checks below were verified as live contracts on-chain; the other bundle-listed addresses were not individually confirmed as active contracts.
 
 ### Where it came from
 
@@ -118,6 +128,8 @@ The `7295799.json` deployment object in the bundle carries `retired: 2026-11-10`
 
 ## 4. Contract source verification (explorer)
 
+**Classification: VERIFIED FACT — proxy source only.** The four proxies' verified source was read directly from the explorer. Whether the implementations behind the proxies are verified was not checked (UNKNOWN).
+
 ### What was checked
 
 Whether the deployed proxy contracts have verified source code on the testnet explorer, and what that source is.
@@ -161,7 +173,9 @@ The comment in the source is the reason this snippet is quoted: it states the pr
 - The proxy ABI returned by the explorer is 804 characters. It is the proxy's own interface, not the vault or registry logic. The full registry and vault ABIs are in the demo bundle (see item 5), not from the explorer.
 - The UserRegistryProxy source was not quoted in full here because it is the same ERC1967Proxy pattern as the SharedVaultProxy above, with the contract name changed. The explorer returns it under `project/src/UserRegistryProxy.sol`.
 
-## 5. The registry ABI: the auditor role in the deployed code
+## 5. The registry ABI: the auditor role exposed in the demo bundle
+
+**Classification: MIXED — VERIFIED FACT + UNKNOWN.** VERIFIED FACT: the ABI fragments quoted are the ABI text embedded in the demo bundle. UNKNOWN: whether the deployed implementation matches that ABI, and what any auditor can read.
 
 ### What was checked
 
@@ -207,6 +221,8 @@ These entries show that the ABI in the bundle models auditors as accounts that c
 
 ## 6. The relayer
 
+**Classification: MIXED — VERIFIED FACT + UNKNOWN.** VERIFIED FACT: the relayer URL as configured in the bundle. UNKNOWN: the relayer's behaviour, logs, and what it records — no request was made.
+
 ### What was checked
 
 Where the demo sends its transactions.
@@ -224,6 +240,8 @@ Where the demo sends its transactions.
 - No request to the relayer was made in this research. Its behaviour, its logs, and what it records about a transaction were not checked.
 
 ## 7. The reference implementation (public repository)
+
+**Classification: DESIGN DESCRIPTION (reference repository).** The quotes are transcribed from `enygma_payments/protocol_description.md` in the public repository, which itself states the quoted material is design, not implemented. This section describes a design in the repository; it is not evidence about the deployed Enygma Public contracts.
 
 ### What was checked
 
@@ -259,6 +277,8 @@ The protocol uses BN254, Pedersen commitments, Groth16 zero-knowledge proofs (wh
 
 ## 8. Technical docs: how Enygma Public works
 
+**Classification: OFFICIAL CLAIM (Rayls docs).** Statements from the Rayls docs pages listed above, quoted or paraphrased. The docs describe the design; they do not prove the deployed contracts behave this way.
+
 ### What was checked
 
 The docs pages that describe the two Enygma editions, the Public deployment's components, and what each party sees.
@@ -293,6 +313,8 @@ From the Enygma Public page:
 
 ## 9. The Rayls blog on auditability
 
+**Classification: OFFICIAL CLAIM (Rayls blog).** Statements from the Rayls blog post listed above. The blog states a model; it names no deployment, contract, or version, and it does not resolve the auditor conflict.
+
 ### What was checked
 
 Rayls' own blog post describing the Enygma audit model.
@@ -311,6 +333,8 @@ The blog describes "mathematical enforcement" as the Enygma model: the cryptogra
 - It conflicts with the docs page that states there are no scoped view keys and audit access is network-wide, and with the reference implementation's own note that scoped auditing is impossible in that construction (item 7). The conflict is recorded as unresolved in `findings/unknowns.md`. The blog does not resolve it. It adds a third official source on the scoped side, next to the AMA.
 
 ## 10. Event logs (retrieved and decoded)
+
+**Classification: VERIFIED FACT.** Logs retrieved from the explorer and decoded from the bundle's ABI. Counts, hashes, blocks, and usernames are the decoded log data. The stated limits (no link to the demo session; key events do not prove read ability) still apply.
 
 ### What was checked
 
@@ -373,6 +397,8 @@ The yx SharedVault was active through the latest block checked: its last log is 
 
 ## 11. What was not found
 
+**Classification: UNKNOWN.** Every sub-item (11.1–11.6) is an unanswered question, with the reason verification is blocked.
+
 Each item below is UNKNOWN, with the reason verification is blocked.
 
 ### 11.1 Full transaction hashes for the demo session
@@ -400,6 +426,8 @@ Not verified on-chain. The 15% commission is verified from the demo UI and state
 Unknown. The deployed contracts are upgradeable proxies whose implementations were not compared to the public repo. The public repo's own protocol document states its auditing section is design, not implemented. No claim is made here that the deployed system implements, or fails to implement, any part of that document.
 
 ## 12. How to repeat these checks
+
+**Classification: METHOD.** Reproducibility instructions, not a finding. No claim is made in this section.
 
 - Chain ID: `curl -s -X POST https://testnet-rpc.rayls.com -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'` — expect `0x6f5337`.
 - Contract code: same endpoint, method `eth_getCode`, params `["<address>","latest"]`.
